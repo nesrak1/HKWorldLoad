@@ -1,0 +1,185 @@
+﻿using AssetsTools.NET;
+using AssetsTools.NET.Extra;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using WorldLoader;
+
+namespace BundleLoader
+{
+    public class Loader
+    {
+        public static byte[] CreateBundleFromLevel(AssetsManager am, /*byte[] data,*/ AssetsFileInstance inst)
+        {
+            AssetsFile file = inst.file;
+            AssetsFileTable table = inst.table;
+
+            string folderName = Path.GetDirectoryName(inst.path);
+            string sceneName = Path.GetFileNameWithoutExtension(inst.path) + "_mod";
+
+            //ulong pathId = 1;
+            //List<AssetsReplacer> assets = new List<AssetsReplacer>();
+            List<AssetsReplacer> assetsSA = new List<AssetsReplacer>();
+
+            //List<AssetID> gameObjectList = new List<AssetID>();
+            //Dictionary<AssetID, ulong> assetMap = new Dictionary<AssetID, ulong>();
+
+            List<AssetFileInfoEx> infos = table.pAssetFileInfo.ToList();
+            List<int> typeIds = new List<int>();
+            foreach (AssetFileInfoEx info in infos)
+            {
+                ////assetMap.Add(new AssetID(0, (long)info.index), pathId);
+                //assets.Add(AssetConverter.ConvertAsset(info, file, file.reader, pathId++));
+                int typeId = (int)info.curFileType;
+                //if (typeId == 0x01)
+                //{
+                //    gameObjectList.Add(new AssetID(1, 10000 + (long)info.index));
+                //}
+                if (!typeIds.Contains(typeId) && typeId != 0x72)
+                    typeIds.Add(typeId);
+            }
+
+            assetsSA.Add(PreloadData.CreatePreloadData(1));
+            assetsSA.Add(BundleMeta.CreateBundleInformation(sceneName, 2));
+            //assetMap.Add(new AssetID(0, 0), pathId);
+            //assets.Insert(0, BundleMeta.CreateBundleInformation(assetMap, 1));
+            //assets.Add(BundleMeta.CreateBundleInformation(assetMap, 1));
+
+            //todo: pull from original assets file, cldb is not always update to date
+            List<Type_0D> types = new List<Type_0D>();
+            foreach (int typeId in typeIds)
+            {
+                types.Add(FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, typeId)));
+            }
+
+            //List<Type_0D> types = new List<Type_0D>()
+            //{
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x2B)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x01)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x04)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x17)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x21)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x32)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x3C)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x3D)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x44)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x52)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x5F)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x68)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x9D)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0xC6)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0xC7)),
+            //     FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0xD4)),
+            //   //FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x72))
+            //};
+
+            List<Type_0D> typesSA = new List<Type_0D>
+            {
+                FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x96)), //PreloadData
+                FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x8E))  //AssetBundle
+            };
+            //List<Type_0D> types = new List<Type_0D>
+            //{
+            //    FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x8E)), //AssetBundle
+            //    FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x1C)), //Texture2D
+            //    FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x31)), //TextAsset
+            //    FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0xD4)), //SpriteRenderer
+            //    FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0xD5)), //Sprite
+            //    FixTypeTree(C2T5.Cldb2TypeTree(am.classFile, 0x31))  //TextAsset
+            //};
+
+            const string ver = "2017.4.10f1";
+            //const string ver = "2018.2.1f1";
+
+            //byte[] blankData = BundleCreator.CreateBlankAssets(ver, types);
+            //AssetsFile blankFile = new AssetsFile(new AssetsFileReader(new MemoryStream(blankData)));
+            //
+            //AssetsReplacer[] assets = new AssetsReplacer[0];
+
+            //byte[] data = null;
+            //using (MemoryStream ms = new MemoryStream())
+            //using (AssetsFileWriter writer = new AssetsFileWriter(ms))
+            //{
+            //    blankFile.WriteFix(writer, 0, assets, 0);
+            //    data = ms.ToArray();
+            //}
+
+            List<AssetsReplacer> changedAssets = new List<AssetsReplacer>();
+            AssetsReplacerFromMemory mem = MoveTest.RunMoveTest(table.getAssetInfo(2642), am.GetATI(file, table.getAssetInfo(2642)).GetBaseField(), 2642) as AssetsReplacerFromMemory;
+            changedAssets.Add(mem);
+
+            byte[] data = null;
+            using (MemoryStream ms = new MemoryStream())
+            using (AssetsFileWriter writer = new AssetsFileWriter(ms))
+            {
+                file.WriteFix(writer, 0, changedAssets.ToArray(), 0);
+                data = ms.ToArray();
+            }
+
+            byte[] blankDataSA = BundleCreator.CreateBlankAssets(ver, typesSA);
+            AssetsFile blankFileSA = new AssetsFile(new AssetsFileReader(new MemoryStream(blankDataSA)));
+
+            byte[] dataSA = null;
+            using (MemoryStream ms = new MemoryStream())
+            using (AssetsFileWriter writer = new AssetsFileWriter(ms))
+            {
+                blankFileSA.WriteFix(writer, 0, assetsSA.ToArray(), 0);
+                dataSA = ms.ToArray();
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            using (AssetsFileWriter writer = new AssetsFileWriter(ms))
+            {
+                AssetsBundleFile bundle = BundleCreator.CreateBlankBundle(ver, data.Length, dataSA.Length, sceneName);
+                bundle.Write(writer);
+                writer.Write(dataSA);
+                writer.Write(data);
+                //bundle.Write(writer, data);
+                return ms.ToArray();
+            }
+        }
+
+        public static AssetTypeValueField GetBaseField(AssetsManager am, AssetsFile file, AssetFileInfoEx info)
+        {
+            AssetTypeInstance ati = am.GetATI(file, info);
+            return ati.GetBaseField();
+        }
+
+        public static Type_0D FixTypeTree(Type_0D tt)
+        {
+            //if basefield isn't 3, unity won't load the bundle
+            tt.pTypeFieldsEx[0].version = 3;
+            return tt;
+        }
+    }
+
+    public class AssetID
+    {
+        public int fileId;
+        public long pathId;
+        public AssetID(int fileId, long pathId)
+        {
+            this.fileId = fileId;
+            this.pathId = pathId;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() != typeof(AssetID))
+                return false;
+            AssetID assetID = obj as AssetID;
+            if (fileId == assetID.fileId &&
+                pathId == assetID.pathId)
+                return true;
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            
+            hash = hash * 23 + fileId.GetHashCode();
+            hash = hash * 23 + pathId.GetHashCode();
+            return hash;
+        }
+    }
+}
