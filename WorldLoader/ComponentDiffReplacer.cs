@@ -27,12 +27,12 @@ namespace WorldLoader
                 object value = DecodeValueByName(fieldChange.data, fieldChange.fieldType);
                 if (value != null)
                 {
-                    UnityEngine.Debug.Log("HKWE SV " + value.ToString());
+                    //UnityEngine.Debug.Log("HKWE SV " + value.ToString());
                     field.GetValue().Set(value);
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("HKWE NV");
+                    //UnityEngine.Debug.Log("HKWE NV");
                 }
             }
 

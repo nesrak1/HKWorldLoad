@@ -29,6 +29,11 @@ namespace WorldLoader
                 t.GetMethod("LoadSceneAsync", new Type[] { typeof(string), typeof(LoadSceneMode) }),
                 GetType().GetMethod("LoadSceneAsync", new Type[] { typeof(Func<string, LoadSceneMode, AsyncOperation>), typeof(string), typeof(LoadSceneMode) })
             );
+            Hook hook2 = new Hook
+            (
+                t.GetMethod("GetSceneByName", new Type[] { typeof(string) }),
+                GetType().GetMethod("GetSceneByName", new Type[] { typeof(Func<string, Scene>), typeof(string) })
+            );
             //Hook hook2 = new Hook
             //(
             //    t.GetMethod("UnloadScene", new Type[] { typeof(string) }),
@@ -51,6 +56,8 @@ namespace WorldLoader
                 {
                     realSceneName = realSceneName.Substring(0, realSceneName.Length - 4);
                     Debug.Log("removing _mod");
+                    if (!WorldLoader.diffDatabase.ContainsKey(realSceneName)) //if the level has _mod we don't have a modded map anymore
+                        return orig(realSceneName, mode); //load the original scene
                 }
                 if (realSceneName.StartsWith("level")) //compat purposes
                 {
@@ -66,7 +73,8 @@ namespace WorldLoader
                     am.LoadClassPackage("cldb.dat");
                     string filePath = Path.Combine("hollow_knight_Data", levelFileName);
                     AssetsFileInstance inst = am.LoadAssetsFile(filePath, false);
-                    byte[] bunDat = Loader.CreateBundleFromLevel(am, inst, realSceneName + "_mod", WorldLoader.diffDatabase[realSceneName]);
+                    byte[] bunDat = Loader.CreateBundleFromLevel(am, inst, realSceneName + "_mod", WorldLoader.diffDatabase[realSceneName], WorldLoader.bunDatabase[realSceneName]); //todo, input other bundle too!
+                    //File.WriteAllBytes(realSceneName + "_mod.unity3d", bunDat);
                     AssetBundle bun = AssetBundle.LoadFromMemory(bunDat);
                     loadedScenes.Add(realSceneName);
                 }
@@ -111,6 +119,12 @@ namespace WorldLoader
             //    return orig(sceneName, mode);
             //    //SceneManagement.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
             //}
+        }
+        public static Scene GetSceneByName(Func<string, Scene> orig, string name)
+        {
+            if (loadedScenes.Contains(name))
+                name = name + "_mod";
+            return orig(name);
         }
         //private static ManualResetEvent sigEvent = new ManualResetEvent(false);
         //public static bool UnloadScene(Func<string, bool> orig, string sceneName)

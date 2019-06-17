@@ -12,6 +12,7 @@ namespace WorldLoader
     public class WorldLoader : Mod
     {
         public static Dictionary<string, DiffFile> diffDatabase;
+        public static Dictionary<string, string> bunDatabase;
         public override void Initialize()
         {
             //UnityEngine.SceneManagement.SceneManager.activeSceneChanged += SceneChanged;
@@ -22,19 +23,21 @@ namespace WorldLoader
             SceneManager.LoadSceneNames();
 
             if (diffDatabase == null)
-            {
                 diffDatabase = new Dictionary<string, DiffFile>();
-            }
+            if (bunDatabase == null)
+                bunDatabase = new Dictionary<string, string>();
 
             foreach (string diffFile in Directory.GetFiles("HKWEDiffs"))
             {
-                if (File.Exists(diffFile))
+                string fileName = Path.GetFileName(diffFile);
+                if (File.Exists(diffFile) && fileName.StartsWith("level") && !fileName.Contains("."))
                 {
+                    //todo check bundle magic
                     AssetBundle bundle = AssetBundle.LoadFromFile(diffFile);
                     TextAsset diffAsset = bundle.LoadAsset<TextAsset>("HKWEDiffData");
                     if (diffAsset == null)
                     {
-                        Debug.Log("HKWE NA");
+                        //Debug.Log("HKWE NA");
                         continue;
                     }
                     byte[] diffData = diffAsset.bytes;
@@ -55,14 +58,15 @@ namespace WorldLoader
                         int levelIndex = -1;
                         if (int.TryParse(realName, out levelIndex))
                         {
-                            Debug.Log("HKWE LI " + levelIndex);
+                            //Debug.Log("HKWE LI " + levelIndex);
                             realName = SceneManager.GetSceneName(int.Parse(realName));
                             diffDatabase[realName] = file;
-                            Debug.Log("loaded scene " + realName);
+                            bunDatabase[realName] = diffFile;
+                            //Debug.Log("loaded scene " + realName);
                         }
                         else
                         {
-                            Debug.Log("Couldn't load index " + realName);
+                            //Debug.Log("Couldn't load index " + realName);
                         }
                     }
                 }
@@ -95,10 +99,10 @@ namespace WorldLoader
             //}
         }
 
-        private void Achievement_ctor(On.Achievement.orig_ctor orig, Achievement self)
-        {
-            throw new NotImplementedException();
-        }
+        //private void Achievement_ctor(On.Achievement.orig_ctor orig, Achievement self)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GetVersion()
         {

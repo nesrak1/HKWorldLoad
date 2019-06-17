@@ -52,8 +52,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>E:\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="AssetsTools.NET">
-      <HintPath>..\..\..\..\Documents\HKEdit\Assets\AssetsTools.NET.dll</HintPath>
+    <Reference Include="AssetsTools.NET, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Documents\GitReposLocal\AssetsTools.NET_3.5\AssetTools.NET\bin\Debug\AssetsTools.NET.dll</HintPath>
     </Reference>
     <Reference Include="ModCommon">
       <HintPath>E:\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\ModCommon.dll</HintPath>
@@ -78,6 +79,8 @@
     <Compile Include="AssetBundler\Extensions.cs" />
     <Compile Include="AssetBundler\Loader.cs" />
     <Compile Include="AssetBundler\PreloadData.cs" />
+    <Compile Include="Hashes.cs" />
+    <Compile Include="ReferenceCrawler.cs" />
     <Compile Include="GameObjectHasher.cs" />
     <Compile Include="DiffStructs.cs" />
     <Compile Include="ComponentDiffReplacer.cs" />
@@ -92,7 +95,7 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <PostBuildEvent>copy /B /Y "C:\Users\karse\source\repos\WorldLoader\WorldLoader\bin\x64\Debug\WorldLoader.dll" "E:\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\"</PostBuildEvent>
-  </PropertyGroup>
+  </PropertyGroup>-->
 </Project>

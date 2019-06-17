@@ -1,4 +1,5 @@
 ﻿using AssetsTools.NET;
+using AssetsTools.NET.Extra;
 using BundleLoader;
 using System;
 using System.Collections.Generic;

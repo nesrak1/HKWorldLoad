@@ -14,6 +14,7 @@ namespace WorldLoader
         public List<GameObjectChange> changes;
         public List<GameObjectAdd> adds;
         public List<GameObjectRemove> removes;
+        public List<GameObjectInfo> infos;
         public void Read(BinaryReader r)
         {
             magic = r.ReadUInt32();
@@ -42,6 +43,14 @@ namespace WorldLoader
                 GameObjectRemove remove = new GameObjectRemove();
                 remove.Read(r);
                 removes.Add(remove);
+            }
+            infos = new List<GameObjectInfo>();
+            int infosCount = r.ReadInt32();
+            for (int i = 0; i < infosCount; i++)
+            {
+                GameObjectInfo info = new GameObjectInfo();
+                info.Read(r);
+                infos.Add(info);
             }
         }
     }
@@ -110,7 +119,7 @@ namespace WorldLoader
         public byte[] data;
         public void Read(string typeName, BinaryReader r)
         {
-            UnityEngine.Debug.Log("HKWE FC " + fieldName + " + " + fieldType);
+            //UnityEngine.Debug.Log("HKWE FC " + fieldName + " + " + fieldType);
             fieldName = r.ReadString();
             fieldType = r.ReadString();
             data = r.ReadBytes(r.ReadInt32());
@@ -121,10 +130,14 @@ namespace WorldLoader
     {
         public long pathId;
         public long parentId;
+        public bool goNew;
+        public bool parentNew;
         public void Read(BinaryReader r)
         {
             pathId = r.ReadInt64();
             parentId = r.ReadInt64();
+            goNew = r.ReadBoolean();
+            parentNew = r.ReadBoolean();
         }
     }
 
@@ -134,6 +147,21 @@ namespace WorldLoader
         public void Read(BinaryReader r)
         {
             pathId = r.ReadInt64();
+        }
+    }
+
+    public struct GameObjectInfo
+    {
+        public string name;
+        public uint fileId;
+        public ulong origPathId;
+        public ulong pathId;
+        public void Read(BinaryReader r)
+        {
+            name = r.ReadString();
+            fileId = r.ReadUInt32();
+            origPathId = r.ReadUInt64();
+            pathId = r.ReadUInt64();
         }
     }
 }
